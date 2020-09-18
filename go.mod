@@ -1,4 +1,4 @@
-module github.com/alibaba/kt-connect
+module github.com/JayceLau/kt-connect/v0.0.13-rc11-z5nctl
 
 go 1.13
 
