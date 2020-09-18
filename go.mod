@@ -1,4 +1,4 @@
-module github.com/JayceLau/kt-connect
+module github.com/JayceLau/kt-connect/v0
 
 go 1.13
 
