@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	clusterWatcher "github.com/alibaba/kt-connect/pkg/apiserver/cluster"
 	"github.com/alibaba/kt-connect/pkg/kt/util"
@@ -96,7 +97,7 @@ func (k *Kubernetes) GetOrCreateShadow(name, namespace, image string, labels, en
 	debug bool, reuseShadow bool) (podIP, podName, sshcm string, credential *util.SSHCredential, err error) {
 
 	component, version := labels["kt-component"], labels["version"]
-	sshcm = fmt.Sprintf("kt-%s-public-key-%s", component, version)
+	sshcm = fmt.Sprintf("kt-%s-public-key-%s-%s", component,strings.ToLower(util.RandomString(5)), version)
 
 	privateKeyPath := util.PrivateKeyPath(component, version)
 
