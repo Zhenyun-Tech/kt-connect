@@ -3,6 +3,7 @@ module github.com/JayceLau/kt-connect
 go 1.13
 
 require (
+	github.com/alibaba/kt-connect v0.0.12
 	github.com/armon/go-socks5 v0.0.0-20160902184237-e75332964ef5
 	github.com/deckarep/golang-set v1.7.1
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
