@@ -1,4 +1,4 @@
-module github.com/JayceLau/kt-connect/v0.0.13-rc11-z5nctl
+module github.com/JayceLau/kt-connect/v0.0.12
 
 go 1.13
 
