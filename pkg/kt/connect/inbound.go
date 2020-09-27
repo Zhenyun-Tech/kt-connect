@@ -1,7 +1,6 @@
 package connect
 
 import (
-	"context"
 	"fmt"
 	"github.com/alibaba/kt-connect/pkg/kt/cluster"
 	"strconv"
@@ -30,13 +29,13 @@ func inbound(exposePorts, podName, remoteIP string, credential *util.SSHCredenti
 	kubernetesCli kubectl.CliInterface,
 	ssh channel.Channel,
 ) (err error) {
-	stop := make(chan bool)
-	rootCtx, cancel := context.WithCancel(context.Background())
-
-	// one of the background process start failed and will cancel the started process
-	go func() {
-		util.StopBackendProcess(<-stop, cancel)
-	}()
+	//stop := make(chan bool)
+	//rootCtx, cancel := context.WithCancel(context.Background())
+	//
+	//// one of the background process start failed and will cancel the started process
+	//go func() {
+	//	util.StopBackendProcess(<-stop, cancel)
+	//}()
 
 	log.Info().Msgf("remote %s forward to local %s", remoteIP, exposePorts)
 	localSSHPort, err := strconv.Atoi(util.GetRandomSSHPort(remoteIP))
