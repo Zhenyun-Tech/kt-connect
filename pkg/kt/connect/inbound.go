@@ -3,6 +3,7 @@ package connect
 import (
 	"context"
 	"fmt"
+	"github.com/JayceLau/kt-connect/pkg/kt/cluster"
 	"strconv"
 	"strings"
 	"sync"
@@ -11,7 +12,6 @@ import (
 	"github.com/alibaba/kt-connect/pkg/kt/channel"
 	"github.com/alibaba/kt-connect/pkg/kt/options"
 
-	"github.com/alibaba/kt-connect/pkg/kt/exec"
 	"github.com/alibaba/kt-connect/pkg/kt/exec/kubectl"
 	"github.com/alibaba/kt-connect/pkg/kt/util"
 	"github.com/rs/zerolog/log"
@@ -53,27 +53,31 @@ func inbound(exposePorts, podName, remoteIP string, credential *util.SSHCredenti
 	return nil
 }
 
-func portForward(rootCtx context.Context, kubernetesCli kubectl.CliInterface, podName string, localSSHPort int,
-	stop chan bool, options *options.DaemonOptions,
+func portForward( podName string, localSSHPort int,  options *options.DaemonOptions,
 ) error {
 	var err error
 	var wg sync.WaitGroup
 
-	debug := options.Debug
+	//debug := options.Debug
 	namespace := options.Namespace
+	kubernetes, err := cluster.Create(options.KubeConfig)
 
 	wg.Add(1)
 	go func(wg *sync.WaitGroup) {
-		portforward := kubernetesCli.PortForward(namespace, podName, localSSHPort)
-		err = exec.BackgroundRunWithCtx(
-			&exec.CMDContext{
-				Ctx:  rootCtx,
-				Cmd:  portforward,
-				Name: "exchange port forward to local",
-				Stop: stop,
-			},
-			debug,
-		)
+		err:=kubernetes.PortForward(namespace,podName,localSSHPort)
+		//portforward := kubernetesCli.PortForward(namespace, podName, localSSHPort)
+		//err = exec.BackgroundRunWithCtx(
+		//	&exec.CMDContext{
+		//		Ctx:  rootCtx,
+		//		Cmd:  portforward,
+		//		Name: "exchange port forward to local",
+		//		Stop: stop,
+		//	},
+		//	debug,
+		//)
+		if err != nil {
+			return
+		}
 		log.Info().Msgf("wait(%ds) port-forward successful", options.WaitTime)
 		time.Sleep(time.Duration(options.WaitTime) * time.Second)
 		wg.Done()

@@ -1,8 +1,14 @@
 package cluster
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/tools/portforward"
+	"k8s.io/client-go/transport/spdy"
+	"net/http"
+	"net/url"
 	"strconv"
 	"strings"
 
@@ -97,7 +103,7 @@ func (k *Kubernetes) GetOrCreateShadow(name, namespace, image string, labels, en
 	debug bool, reuseShadow bool) (podIP, podName, sshcm string, credential *util.SSHCredential, err error) {
 
 	component, version := labels["kt-component"], labels["version"]
-	sshcm = fmt.Sprintf("kt-%s-public-key-%s-%s", component,strings.ToLower(util.RandomString(5)), version)
+	sshcm = fmt.Sprintf("kt-%s-public-key-%s-%s", component, strings.ToLower(util.RandomString(5)), version)
 
 	privateKeyPath := util.PrivateKeyPath(component, version)
 
@@ -412,5 +418,51 @@ func decreaseRef(refCount string) (count string, err error) {
 		return
 	}
 	count = strconv.Itoa(currentCount - 1)
+	return
+}
+
+func (k *Kubernetes) PortForward(namespace, resource string, remotePort int) (err error) {
+	pod, err := k.Clientset.CoreV1().Pods(namespace).Get(resource, metav1.GetOptions{})
+	if err != nil {
+		return
+	}
+
+	if pod.Status.Phase != v1.PodRunning {
+		log.Error().Msg(fmt.Sprintf("unable to forward port because pod is not running. Current status=%v", pod.Status.Phase))
+	}
+
+	config, err := clientcmd.BuildConfigFromFlags("", k.KubeConfig)
+	if err != nil {
+		return
+	}
+	roundTripper, upgrader, err := spdy.RoundTripperFor(config)
+
+	path := fmt.Sprintf("/api/v1/namespaces/%s/pods/%s/portforward", namespace, resource)
+	hostIP := strings.TrimLeft(config.Host, "htps:/")
+	serverURL := url.URL{Scheme: "https", Path: path, Host: hostIP}
+	dialer := spdy.NewDialer(upgrader, &http.Client{Transport: roundTripper}, http.MethodPost, &serverURL)
+
+	stopChan, readyChan := make(chan struct{}, 1), make(chan struct{}, 1)
+	out, errOut := new(bytes.Buffer), new(bytes.Buffer)
+
+
+	forwarder, err := portforward.New(dialer, []string{fmt.Sprintf("%d:22", remotePort)}, stopChan, readyChan, out, errOut)
+	if err != nil {
+		panic(err)
+	}
+
+	go func() {
+		for range readyChan { // Kubernetes will close this channel when it has something to tell us.
+		}
+		if len(errOut.String()) != 0 {
+			panic(errOut.String())
+		} else if len(out.String()) != 0 {
+			fmt.Println(out.String())
+		}
+	}()
+
+	if err = forwarder.ForwardPorts(); err != nil { // Locks until stopChan is closed.
+		panic(err)
+	}
 	return
 }

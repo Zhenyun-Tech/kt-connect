@@ -40,6 +40,7 @@ type KubernetesInterface interface {
 	GetDeployment(name string, namespace string) (*appV1.Deployment, error)
 	UpdateDeployment(namespace string, deployment *appV1.Deployment) (*appV1.Deployment, error)
 	DecreaseRef(namespace string, deployment string) (cleanup bool, err error)
+	PortForward(namespace string, resource string, remotePort int) (err error)
 }
 
 // Kubernetes implements KubernetesInterface
