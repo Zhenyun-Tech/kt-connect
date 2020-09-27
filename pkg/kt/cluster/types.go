@@ -14,6 +14,7 @@ func Create(kubeConfig string) (kubernetes KubernetesInterface, err error) {
 		return
 	}
 	return &Kubernetes{
+		KubeConfig: kubeConfig,
 		Clientset: clientSet,
 	}, nil
 }
