@@ -29,4 +29,4 @@ require (
 
 replace github.com/ugorji/go v1.1.4 => github.com/ugorji/go/codec v0.0.0-20190204201341-e444a5086c43
 
-replace github.com/alibaba/kt-connect => github.com/JayceLau/kt-connect v0.0.13-rc11-z5nctl
+replace github.com/alibaba/kt-connect => github.com/JayceLau/kt-connect v0.0.13-rc11-z5nctl1

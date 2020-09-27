@@ -3,7 +3,7 @@ package connect
 import (
 	"context"
 	"fmt"
-	"github.com/JayceLau/kt-connect/pkg/kt/cluster"
+	"github.com/alibaba/kt-connect/pkg/kt/cluster"
 	"strconv"
 	"strings"
 	"sync"
@@ -43,7 +43,7 @@ func inbound(exposePorts, podName, remoteIP string, credential *util.SSHCredenti
 	if err != nil {
 		return
 	}
-	err = portForward(rootCtx, kubernetesCli, podName, localSSHPort, stop, options)
+	err = portForward(podName, localSSHPort, options)
 
 	if err != nil {
 		return
@@ -53,8 +53,7 @@ func inbound(exposePorts, podName, remoteIP string, credential *util.SSHCredenti
 	return nil
 }
 
-func portForward( podName string, localSSHPort int,  options *options.DaemonOptions,
-) error {
+func portForward(podName string, localSSHPort int, options *options.DaemonOptions) error {
 	var err error
 	var wg sync.WaitGroup
 
@@ -64,7 +63,7 @@ func portForward( podName string, localSSHPort int,  options *options.DaemonOpti
 
 	wg.Add(1)
 	go func(wg *sync.WaitGroup) {
-		err:=kubernetes.PortForward(namespace,podName,localSSHPort)
+		err := kubernetes.PortForward(namespace, podName, localSSHPort)
 		//portforward := kubernetesCli.PortForward(namespace, podName, localSSHPort)
 		//err = exec.BackgroundRunWithCtx(
 		//	&exec.CMDContext{
