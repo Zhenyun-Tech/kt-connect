@@ -6,11 +6,13 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
+	"github.com/alibaba/kt-connect/pkg/kt/util"
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 
-	"github.com/alibaba/kt-connect/pkg/kt/vars"
+	"github.com/Zhenyun-Tech/kt-connect/pkg/kt/vars"
 	"github.com/rs/zerolog/log"
 	"golang.org/x/crypto/ssh"
 )
@@ -69,7 +71,7 @@ func Generate(privateKeyPath string) (*SSHGenerator, error) {
 
 // PrivateKeyPath ...
 func PrivateKeyPath(component, identifier string) string {
-	return fmt.Sprintf("%s/.ktctl/%s/"+vars.SSHPrivateKeyName, HomeDir(), component, identifier)
+	return fmt.Sprintf("%s/.ktctl/%s/"+vars.SSHPrivateKeyName, HomeDir(), component, strings.ToLower(util.RandomString(5)), identifier)
 }
 
 // generatePrivateKey creates a RSA Private Key of specified byte size

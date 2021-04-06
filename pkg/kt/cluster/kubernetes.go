@@ -12,9 +12,9 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Zhenyun-Tech/kt-connect/pkg/kt/util"
+	"github.com/Zhenyun-Tech/kt-connect/pkg/kt/vars"
 	clusterWatcher "github.com/alibaba/kt-connect/pkg/apiserver/cluster"
-	"github.com/alibaba/kt-connect/pkg/kt/util"
-	"github.com/alibaba/kt-connect/pkg/kt/vars"
 	"github.com/rs/zerolog/log"
 	appv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
@@ -103,6 +103,7 @@ func (k *Kubernetes) GetOrCreateShadow(name, namespace, image string, labels, en
 	debug bool, reuseShadow bool) (podIP, podName, sshcm string, credential *util.SSHCredential, err error) {
 
 	component, version := labels["kt-component"], labels["version"]
+
 	sshcm = fmt.Sprintf("kt-%s-public-key-%s-%s", component, strings.ToLower(util.RandomString(5)), version)
 
 	privateKeyPath := util.PrivateKeyPath(component, version)
@@ -444,7 +445,6 @@ func (k *Kubernetes) PortForward(namespace, resource string, remotePort int) (er
 
 	stopChan, readyChan := make(chan struct{}, 1), make(chan struct{}, 1)
 	out, errOut := new(bytes.Buffer), new(bytes.Buffer)
-
 
 	forwarder, err := portforward.New(dialer, []string{fmt.Sprintf("%d:22", remotePort)}, stopChan, readyChan, out, errOut)
 	if err != nil {
